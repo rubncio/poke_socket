@@ -18,21 +18,30 @@ async def websocket_endpoint(ws: WebSocket):
      
     await ws.send_text(f"jugadores en linea:{clientes.numeroClientes}/2")
     await ws.send_text("Introduce tu nombre.")
+    
     name = await ws.receive_text()
+    
+    
     try: 
         if not clientes.clientes_completo():
             clientes.añadir(name, ws)
             print(f"Jugador conectado: {name}")
             await ws.send_text(f"Te has conectado: {name}")
-
+    
             #Esperando dos jugadores
             if not clientes.clientes_completo():
                 await ws.send_text("esperando otro jugador....")
-                clientes.esperar_clientes()
-            await ws.send_text(f"jugadores: {clientes.listclientes[0].nombre} VS {clientes.listclientes[1].nombre}")
+                await clientes.esperar_clientes(ws)
+            
+            if clientes.clientes_completo():
+                await clientes.enviar_todos(f"jugadores: {clientes.listclientes[0].nombre} VS {clientes.listclientes[1].nombre}")
+                #await ws.send_text(f"jugadores: {clientes.listclientes[0].nombre} VS {clientes.listclientes[1].nombre}")
 
+            """
+            elegir_pokemon(pokemon1, pokemon2)
             while True:
-                pass
+                await ws.receive_text()"""
+            
             
         else:
             await ws.send_text("ya hay suficientes jugadores.")

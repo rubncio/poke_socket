@@ -1,9 +1,10 @@
+import random
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from cliente import Cliente
 class Clientes:
     def __init__(self):
         
-        self.listclientes=list()
+        self.listclientes=list[Cliente]()
         self.numeroClientes=0
     def añadir(self,nombre, ws:WebSocket)->bool:
         if self.numeroClientes<2:
@@ -15,12 +16,25 @@ class Clientes:
             return False
         
     def eliminar(self, ws:WebSocket):
-        self.listclientes.remove(ws)
+        indice_eliminar=[cliente.ws for cliente in self.listclientes].index(ws)
+        self.listclientes.pop(indice_eliminar)
+        self.numeroClientes-=1
+        print("Desconectando cliente")
 
     def clientes_completo(self)->bool:
         return self.numeroClientes==2
     
-    def esperar_clientes(self):
+    async def esperar_clientes(self, ws:WebSocket):
         
-        while(not self.clientes_completo):
-            pass
+            while(not self.clientes_completo()):
+                await ws.receive_text()
+            print(f"saliendo bucle con {self.numeroClientes} jugadores")
+
+    async def enviar_todos(self, text):
+        for cliente in self.listclientes:
+            await cliente.ws.send_text(text)
+
+    async def elegir_pokemon(self, pokemon1, pokemon2):
+        for cliente in self.listclientes:
+            cliente.pokemon=random.choice([pokemon1, pokemon2])
+            await cliente.ws.send_text(f"enhorabuena {cliente.nombre} te ha tocado el pokemon {cliente.pokemon.nombre}")
