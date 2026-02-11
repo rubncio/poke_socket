@@ -18,7 +18,9 @@
     const ws = new WebSocket("ws://localhost:8000/ws");
 
     ws.onmessage = (event) => {
-      log.innerHTML += `<p>${event.data}</p>`;
+      if (event.data!="ping"){
+        log.innerHTML += `<p>${event.data}</p>`;
+      }
     };
 
     function sendName() {
