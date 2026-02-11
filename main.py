@@ -1,6 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from clientes import Clientes
+from cliente import Cliente
 
 app = FastAPI()
 clientes=Clientes()
@@ -24,19 +25,23 @@ async def websocket_endpoint(ws: WebSocket):
     
     try: 
         if not clientes.clientes_completo():
-            clientes.añadir(name, ws)
+            cliente=Cliente(name, ws)
+            clientes.añadir(cliente)
             print(f"Jugador conectado: {name}")
             await ws.send_text(f"Te has conectado: {name}")
     
             #Esperando dos jugadores
             if not clientes.clientes_completo():
                 await ws.send_text("esperando otro jugador....")
-                await clientes.esperar_clientes(ws)
+                await clientes.esperar_clientes()
+                await ws.send_text("2º jugador conectado")
+            else:
+                clientes.sala_espera.set()
             
             if clientes.clientes_completo():
-                await clientes.enviar_todos(f"jugadores: {clientes.listclientes[0].nombre} VS {clientes.listclientes[1].nombre}")
+                await ws.send_text(f"jugadores: {clientes.listclientes[0].nombre} VS {clientes.listclientes[1].nombre}")
                 #await ws.send_text(f"jugadores: {clientes.listclientes[0].nombre} VS {clientes.listclientes[1].nombre}")
-
+                await ws.send_text(f"enhorabuena {cliente.nombre} tu pokemon sera {cliente.pokemon}")
             """
             elegir_pokemon(pokemon1, pokemon2)
             while True:

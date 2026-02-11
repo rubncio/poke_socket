@@ -1,16 +1,18 @@
+import asyncio
 import random
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from cliente import Cliente
 class Clientes:
     def __init__(self):
-        
+        self.lista_pokemons=["pokemon","charizard","bulbasur","squirtel","charmander"]
         self.listclientes=list[Cliente]()
         self.numeroClientes=0
-    def añadir(self,nombre, ws:WebSocket)->bool:
+        self.sala_espera=asyncio.Event()
+    def añadir(self, cliente:Cliente)->bool:
         if self.numeroClientes<2:
             self.numeroClientes+=1
-            
-            self.listclientes.append(Cliente(nombre, ws))
+            cliente.pokemon=random.choice(self.lista_pokemons)
+            self.listclientes.append(cliente)
             return True
         else:
             return False
@@ -24,15 +26,14 @@ class Clientes:
     def clientes_completo(self)->bool:
         return self.numeroClientes==2
     
-    async def esperar_clientes(self, ws:WebSocket):
-        
-            while(not self.clientes_completo()):
-                await ws.receive_text()
-            print(f"saliendo bucle con {self.numeroClientes} jugadores")
+    async def esperar_clientes(self):
+        print("cliente se pone a la espera")
+        await self.sala_espera.wait()
+        print("cliente se despierta")
 
-    async def enviar_todos(self, text):
+    """async def enviar_todos(self, text):
         for cliente in self.listclientes:
-            await cliente.ws.send_text(text)
+            await cliente.ws.send_text(text)"""
 
     async def elegir_pokemon(self, pokemon1, pokemon2):
         for cliente in self.listclientes:

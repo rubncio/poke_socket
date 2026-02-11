@@ -3,5 +3,6 @@ class Cliente:
     def __init__(self, nombre, ws:WebSocket):
         self.nombre=nombre
         self.ws=ws
-        self.pokemon=Pokemon
+        self.pokemon=str()
+    
     
