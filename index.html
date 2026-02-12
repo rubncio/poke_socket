@@ -7,8 +7,8 @@
 <style>
 .contenedor-botones {
   position: fixed;      /* Se mantiene fijo */
-  left: 0;              /* Lado izquierdo */
-  top: 50%;             /* Centro vertical */
+  left: 50vw;              /* Lado izquierdo */
+  bottom:0%;             /* Centro vertical */
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;  /* Los coloca en vertical */
@@ -38,11 +38,7 @@
 
     ws.onmessage = (event) => {
       if(event.data=="empezar-combate"){
-        log.innerHTML += '<div class="contenedor-botones">'
-        log.innerHTML += '<button class="boton-fijo" onclick="defender()">DEFENDER</button>'
-        log.innerHTML += '<button class="boton-fijo" onclick="atacar()">ATACAR</button>'
-        log.innerHTML += '<p class="boton-fijo" id="tiempo"></p>'
-        log.innerHTML += '</div>'
+        log.innerHTML += '<div class="contenedor-botones"> <button class="boton-fijo" onclick="defender()">DEFENDER</button> <button class="boton-fijo" onclick="atacar()">ATACAR</button> <p class="boton-fijo" id="tiempo"></p> </div>'
       }
       else if (event.data=="iniciar-temporizador"){
         log.innerHTML += `<p>${event.data}</p>`;

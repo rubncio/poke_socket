@@ -25,22 +25,24 @@ class Pokemon:
         
     def defender(self, ataque_a_defender)->Defensa:
         defensa:Defensa=random.choice(self.defensas)
+        
         self.recibir_daño(ataque_a_defender, defensa)
         return defensa
 
-    def recibir_daño(self, ataque:Ataque):
+    """def recibir_daño(self, ataque:Ataque):
         daño=ataque.daño
         self.vida-=daño
         if self.vida<=0:
-            self.vivo=False
+            self.vivo=False"""
     
     def recibir_daño(self, ataque:Ataque, defensa:Defensa=None):
-        daño=ataque.daño
-        if defensa:
-            daño-=defensa.escudo
-        self.vida-=daño
-        if self.vida<=0:
-            self.vivo=False
+        if ataque:
+            daño=ataque.daño
+            if defensa:
+                daño-=defensa.escudo
+            self.vida-=daño
+            if self.vida<=0:
+                self.vivo=False
 
 
 

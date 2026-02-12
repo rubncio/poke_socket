@@ -100,33 +100,41 @@ async def websocket_endpoint(ws: WebSocket):
             turno+=1
             
             #Movimiento Servidor
+            #Decidiendo tipo de movimiento.
             accion_servidor=random.choice(["atacar", "defender"])
-            if accion_servidor=="atacar" or turno==1 or accionCliente=="defensa":
+
+            #ejecutando movimiento.
+            if accion_servidor=="atacar" or turno==1 or accionCliente=="defender":
                 ataqueServidor=pokemon_servidor.atacar()
                 await ws.send_text(f"{pokemon_servidor.nombre} te ha atacado con {ataqueServidor.nombre} el cual te quitará {ataqueServidor.daño} de vida")
 
             else:
                 defensa :Defensa=pokemon_servidor.defender(ataqueCliente)
+                ataqueServidor=None
                 if not pokemon_servidor.vivo:
-                        break
-                await ws.send_text(f"{pokemon_servidor} se ha defendido usando {defensa.nombre} contra tu ataque {ataqueCliente.nombre} quedandole de vida {pokemon_servidor.vida}")
+                    break
+                await ws.send_text(f"{pokemon_servidor} se ha defendido usando {defensa.nombre}, el cual bloqueará {defensa.escudo} puntos")
 
             #Movimiento Cliente
+            #Decidiendo tipo de movimiento.
             await ws.send_text("Selecciona que quieres hacer ATACAR o DEFENDER el ataque")
             accion= await ws.receive_text()
+
+            #ejecutando movimiento.
             if accion=="ATACAR":
                 pokemon_cliente.recibir_daño(ataqueServidor)
                 if not pokemon_cliente.vivo:
                     break
                 accionCliente="atacar"
                 ataqueCliente=pokemon_cliente.atacar()
-                await ws.send_text(f"has atacado a {pokemon_servidor.nombre} con {ataqueCliente.nombre}")
+                await ws.send_text(f"has atacado a {pokemon_servidor.nombre} con {ataqueCliente.nombre} con un daño de {ataqueCliente.daño} puntos.")
                 
             else:
+                accionCliente="defender"
                 defensa :Defensa=pokemon_cliente.defender(ataqueServidor)
                 if not pokemon_cliente.vivo:
                     break
-                await ws.send_text(f"{pokemon_servidor} te has defendido usando {defensa.nombre} contra su ataque {ataqueServidor.nombre} quedandote de vida {pokemon_cliente.vida}")
+                await ws.send_text(f"{pokemon_servidor} te has defendido usando {defensa.nombre}, el cual bloqueará {defensa.escudo} puntos")
 
     
     except WebSocketDisconnect:
