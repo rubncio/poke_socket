@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pokemon Battle</title>
+</head>
+<style>
+.contenedor-botones {
+  position: fixed;      /* Se mantiene fijo */
+  left: 0;              /* Lado izquierdo */
+  top: 50%;             /* Centro vertical */
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;  /* Los coloca en vertical */
+  gap: 10px;               /* Espacio entre botones */
+}
+
+.boton-fijo {
+  padding: 12px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+</style>
+<body>
+
+  <h1>Pokemon Battle</h1>
+
+  <input type="text" id="name" placeholder="Tu nombre">
+  <button onclick="sendName()">empezar</button>
+
+  <div id="log"></div>
+
+  <script>
+    const log = document.getElementById("log");
+    const ws = new WebSocket("ws://localhost:8000/ws");
+
+    ws.onmessage = (event) => {
+      if(event.data=="empezar-combate"){
+        log.innerHTML += '<div class="contenedor-botones">'
+        log.innerHTML += '<button class="boton-fijo" onclick="defender()">DEFENDER</button>'
+        log.innerHTML += '<button class="boton-fijo" onclick="atacar()">ATACAR</button>'
+        log.innerHTML += '<p class="boton-fijo" id="tiempo"></p>'
+        log.innerHTML += '</div>'
+      }
+      else if (event.data=="iniciar-temporizador"){
+        log.innerHTML += `<p>${event.data}</p>`;
+      }
+      else if (event.data!="ping"){
+        log.innerHTML += `<p>${event.data}</p>`;
+      }
+
+    };
+
+    function sendName() {
+      const name = document.getElementById("name").value;
+      if(name != null || name != null){
+      ws.send(name);
+      }
+    }
+    function atacar() {
+      ws.send("ATACAR");
+      
+    }
+    function defender() {
+      ws.send("DEFENDER");
+    }
+  </script>
+
+</body>
+</html>
