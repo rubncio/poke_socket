@@ -38,14 +38,20 @@
 
     ws.onmessage = (event) => {
       if(event.data=="empezar-combate"){
-        log.innerHTML += '<div class="contenedor-botones"> <button class="boton-fijo" onclick="defender()">DEFENDER</button> <button class="boton-fijo" onclick="atacar()">ATACAR</button> <p class="boton-fijo" id="tiempo"></p> </div>'
+        log.innerHTML += '<div class="contenedor-botones"> <button class="boton-fijo" onclick="defender()">DEFENDER</button> <button class="boton-fijo" onclick="atacar()">ATACAR</button> <p class="boton-fijo" id="vida"></p> </div>'
       }
       else if (event.data=="iniciar-temporizador"){
-        log.innerHTML += `<p>${event.data}</p>`;
+        //log.innerHTML += `<p>${event.data}</p>`;
+      }
+      else if(event.data.startsWith("VIDA|") || event.data=="DERROTADO" || event.data=="VICTORIOSO"){
+        parrafo=document.getElementById("vida");
+        parrafo.textContent=event.data;
+        
       }
       else if (event.data!="ping"){
         log.innerHTML += `<p>${event.data}</p>`;
       }
+      
 
     };
 

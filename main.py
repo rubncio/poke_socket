@@ -94,25 +94,34 @@ async def websocket_endpoint(ws: WebSocket):
         time.sleep(2)
         await ws.send_text("empezar-combate")
         turno=0
-        ataqueCliente:Ataque
+        ataqueCliente=None
         accionCliente=""
         while(True):
             turno+=1
-            
+            await ws.send_text(f"TURNO: {turno}")
+            await ws.send_text(f"VIDA|{pokemon_cliente.vida}")
             #Movimiento Servidor
             #Decidiendo tipo de movimiento.
             accion_servidor=random.choice(["atacar", "defender"])
 
-            #ejecutando movimiento.
+            #ejecutando movimiento SERVIDOR.
             if accion_servidor=="atacar" or turno==1 or accionCliente=="defender":
+                pokemon_servidor.recibir_daño(ataqueCliente)
+                if not pokemon_servidor.vivo:
+                    await ws.send_text(f"{pokemon_servidor.nombre} ha muerto")
+                    await ws.send_text("VICTORIOSO")
+                    break
                 ataqueServidor=pokemon_servidor.atacar()
                 await ws.send_text(f"{pokemon_servidor.nombre} te ha atacado con {ataqueServidor.nombre} el cual te quitará {ataqueServidor.daño} de vida")
 
             else:
                 defensa :Defensa=pokemon_servidor.defender(ataqueCliente)
-                ataqueServidor=None
                 if not pokemon_servidor.vivo:
+                    await ws.send_text(f"{pokemon_servidor.nombre} ha muerto")
+                    await ws.send_text("VICTORIOSO")
                     break
+                ataqueServidor=None
+                
                 await ws.send_text(f"{pokemon_servidor} se ha defendido usando {defensa.nombre}, el cual bloqueará {defensa.escudo} puntos")
 
             #Movimiento Cliente
@@ -120,10 +129,12 @@ async def websocket_endpoint(ws: WebSocket):
             await ws.send_text("Selecciona que quieres hacer ATACAR o DEFENDER el ataque")
             accion= await ws.receive_text()
 
-            #ejecutando movimiento.
+            #ejecutando movimiento CLIENTE.
             if accion=="ATACAR":
                 pokemon_cliente.recibir_daño(ataqueServidor)
                 if not pokemon_cliente.vivo:
+                    await ws.send_text(f"tu {pokemon_cliente.nombre} ha muerto")
+                    await ws.send_text("DERROTADO")
                     break
                 accionCliente="atacar"
                 ataqueCliente=pokemon_cliente.atacar()
@@ -133,8 +144,11 @@ async def websocket_endpoint(ws: WebSocket):
                 accionCliente="defender"
                 defensa :Defensa=pokemon_cliente.defender(ataqueServidor)
                 if not pokemon_cliente.vivo:
+                    await ws.send_text(f"tu {pokemon_cliente.nombre} ha muerto")
+                    await ws.send_text("DERROTADO")
                     break
                 await ws.send_text(f"{pokemon_servidor} te has defendido usando {defensa.nombre}, el cual bloqueará {defensa.escudo} puntos")
+            await ws.send_text(f"VIDA|{pokemon_cliente.vida}")
 
     
     except WebSocketDisconnect:
